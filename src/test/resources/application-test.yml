@@ -1,0 +1,43 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+
+  flyway:
+    enabled: false
+
+telegram:
+  bot:
+    token: test-token-123456:ABC-DEF
+    username: test_bot
+
+app:
+  currency-api:
+    enabled: false
+
+    primary-url: https://nationalbank.kz/rss/get_rates.cfm
+    primary-type: xml
+
+    fallback-url: https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies
+    fallback-type: json
+
+    fallback-rate: 147.50
+
+    timeout-seconds: 5
+    cache-ttl-minutes: 60
+
+logging:
+  level:
+    root: WARN
+    pl.aybolali.plnkztexchangebot: INFO
+    org.hibernate.SQL: ERROR

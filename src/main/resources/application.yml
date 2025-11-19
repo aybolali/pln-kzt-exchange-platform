@@ -1,0 +1,57 @@
+spring:
+  application:
+    name: pln-kzt-exchangeBot
+
+
+  datasource:
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+  h2:
+    console:
+     enabled: false
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: true  # ⭐ КРИТИЧНО! Для существующей БД
+    locations: classpath:db/migration
+
+
+logging:
+  level:
+    root: INFO
+    pl.aybolali.plnkztexchangebot: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+server:
+  port: 8080
+
+app:
+  currency-api:
+    enabled: true
+    primary-url: https://nationalbank.kz/rss/get_rates.cfm
+    primary-type: xml
+
+    fallback-url: https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies
+    fallback-type: json
+    fallback-rate: 147.50
+
+    timeout-seconds: 10
+    cache-ttl-minutes: 60
+
+telegram:
+  bot:
+    token: ${TELEGRAM_BOT_TOKEN}
+    username: ${TELEGRAM_BOT_USERNAME}
+

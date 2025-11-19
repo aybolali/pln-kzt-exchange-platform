@@ -1,0 +1,49 @@
+spring:
+  datasource:
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+server:
+  port: 8080
+
+# ===========================
+# TELEGRAM BOT
+# ===========================
+telegram:
+  bot:
+    token: ${TELEGRAM_BOT_TOKEN}
+    username: ${TELEGRAM_BOT_USERNAME}
+
+app:
+  currency-api:
+    enabled: true
+    primary-url: https://nationalbank.kz/rss/get_rates.cfm
+    fallback-url: https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies
+    fallback-rate: 147.50
+
+# ACTUATOR
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    root: INFO
+    pl.aybolali.plnkztexchangebot: DEBUG
+    pl.aybolali.plnkztexchangebot.service.ExchangeRateService: DEBUG
