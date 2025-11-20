@@ -1,38 +1,74 @@
 # PLN-KZT Exchange Bot 💱
 
-A peer-to-peer currency exchange platform connecting users who need to exchange Polish Złoty (PLN) and Kazakhstani Tenge (KZT). Built with Spring Boot and PostgreSQL, deployed in production serving real users.
+A peer-to-peer currency exchange matching platform connecting users who need to exchange Polish Złoty (PLN) and Kazakhstani Tenge (KZT). Built with Spring Boot and PostgreSQL, deployed in production.
 
 ## 🎯 Problem Statement
 
-Polish students in Kazakhstan and Kazakhstani residents in Poland face high fees and poor exchange rates when transferring money between countries. This platform connects people with complementary currency needs, enabling direct peer-to-peer exchanges at better rates.
+Kazakhstani people in Poland and Polish people in Kazakhstan face high bank fees and poor exchange rates when transferring money between countries. This platform connects them directly - someone in Poland who needs KZT exchanges with someone in Kazakhstan who needs PLN, eliminating intermediaries and getting market rates.
 
 ## ✨ Key Features
 
-- **Smart Matching Algorithm**: Automatically pairs users with complementary exchange needs
-- **Two-Step Confirmation**: Secure deal confirmation process to ensure trust
-- **Rating System**: User trust scores based on completed transactions
-- **Real-Time Exchange Rates**: Integration with National Bank of Kazakhstan API
-- **Automated Cleanup**: Scheduled cleanup of inactive and completed requests
-- **Rate Limiting**: Protection against spam and abuse
-- **Telegram Integration**: Full bot interface for seamless user experience
+- **Smart Matching Algorithm**: Automatically pairs users with complementary exchange needs based on currency pair (PLN↔KZT), amount compatibility (±10% tolerance), user rating scores, and request freshness
+- **Conversation State Management**: Multi-step interactive flow through Telegram bot with session tracking for seamless user experience
+- **Rating System**: User trust scores based on completed transactions, affecting future matching priority
+- **Real-Time Exchange Rates**: Dual API integration (National Bank of Kazakhstan primary + fallback) with 60-minute cache
+- **Automated Cleanup**: Scheduled tasks removing stale data (3 days for active requests, 7 days for completed/cancelled)
+- **Rate Limiting**: In-memory protection against spam (20 commands/min for Telegram, 6 API calls/min, 25 default actions/min)
+- **Security**: Input validation, SQL injection prevention via JPA, Telegram-based authentication (no passwords)
 
 ## 🏗️ Architecture
 
 ```
-├── Domain Layer (Entities)
-│   ├── User
-│   ├── ExchangeRequest
-│   └── Deal
+├── Presentation Layer
+│   ├── Telegram Bot Interface
+│   │   ├── PLNKZTExchangeBot
+│   │   ├── TelegramBotService
+│   │   ├── TelegramKeyboardBuilder
+│   │   ├── TelegramMessageFormatter
+│   │   └── ConversationStateService
+│   └── REST API Controllers
+│       ├── UserController
+│       ├── ExchangeRequestController
+│       ├── DealController
+│       ├── MatchingController
+│       └── RatingController
+│
 ├── Service Layer
-│   ├── TelegramBotService
-│   ├── MatchingService
-│   ├── DealService
-│   └── ExchangeRateService
-├── Repository Layer (Spring Data JPA)
-├── Telegram Bot Interface
-└── Database (PostgreSQL)
+│   ├── Core Business Services
+│   │   ├── UserService
+│   │   ├── ExchangeRequestService
+│   │   ├── DealService
+│   │   ├── MatchingService
+│   │   └── RatingService
+│   └── Infrastructure Services
+│       ├── ExchangeRateService
+│       ├── ExchangeRequestCleanupService
+│       └── SimpleRateLimitService
+│
+├── Data Access Layer
+│   ├── Repositories (Spring Data JPA)
+│   │   ├── UserRepository
+│   │   ├── ExchangeRequestRepository
+│   │   ├── DealRepository
+│   │   └── RatingRepository
+│   └── Domain Entities
+│       ├── User
+│       ├── ExchangeRequest
+│       ├── Deal
+│       └── Rating
+│
+├── External Integrations
+│   ├── Telegram Bot API
+│   ├── National Bank of Kazakhstan API
+│   └── Currency API Fallback
+│
+└── Database Layer
+    └── PostgreSQL
+        ├── users
+        ├── exchange_requests
+        ├── deals
+        └── ratings
 ```
-
 ## 🛠️ Tech Stack
 
 - **Backend**: Java 17, Spring Boot 3.x
@@ -82,36 +118,23 @@ mvn clean install
 mvn spring-boot:run
 ```
 
-### Environment Variables
-
-See `.env.example` for required configuration:
-- `DATABASE_URL`: PostgreSQL connection string
-- `DATABASE_USERNAME`: Database user
-- `DATABASE_PASSWORD`: Database password
-- `TELEGRAM_BOT_TOKEN`: Your Telegram bot token
-- `TELEGRAM_BOT_USERNAME`: Your bot username
-
-## 📊 Features in Detail
+## 📊 How It Works
 
 ### Matching Algorithm
-The system implements intelligent matching based on:
-- Currency pair (PLN→KZT or KZT→PLN)
-- Amount compatibility (±10% tolerance)
-- Geographic location (city-based)
-- Request freshness (newer requests prioritized)
+1. User creates exchange request via Telegram bot
+2. System finds compatible requests based on:
+   - Currency pair (PLN→KZT or KZT→PLN)
+   - Amount tolerance (±10%)
+   - User rating scores (higher ratings prioritized)
+   - Request freshness (newer first)
+3. Matched users connect through Telegram
+4. After physical exchange, both users rate each other
 
-### Security & Rate Limiting
-- In-memory rate limiting (100 requests/minute per user)
-- Input validation and sanitization
-- SQL injection prevention via JPA
-- Scheduled cleanup of stale data
-
-### Deal Processing
-1. User creates exchange request
-2. System finds matching requests
-3. Users confirm deal (two-step process)
-4. After physical exchange, users rate each other
-5. Ratings affect future matching priority
+### Conversation Flow
+- Multi-step interactive dialogs
+- Session state management per user
+- Contextual keyboards for easy navigation
+- Input validation at each step
 
 ## 🧪 Testing
 
@@ -152,13 +175,6 @@ docker-compose logs -f app
 docker-compose down
 ```
 
-## 📝 Database Schema
-
-- **users**: User profiles and ratings
-- **exchange_requests**: Active and historical requests
-- **deals**: Completed transaction records
-- **flyway_schema_history**: Migration tracking
-
 
 ## 🤝 Contributing
 
@@ -166,17 +182,4 @@ This is a personal portfolio project, but feedback and suggestions are welcome!
 
 ## 👤 Author
 
-**Aibolali**
-- Building full-stack applications with Spring Boot
-- Interested in fintech and p2p solutions
-- Open to opportunities in software engineering
-
-## 🙏 Acknowledgments
-
-- Telegram Bot API for seamless integration
-- National Bank of Kazakhstan for exchange rate data
-- Spring Boot community for excellent documentation
-
----
-
-*Built with ❤️ to solve a real problem for Polish-Kazakh community*
+**@aybolali**
