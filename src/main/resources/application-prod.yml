@@ -16,7 +16,7 @@ spring:
   # JPA/Hibernate Configuration
   jpa:
     hibernate:
-      ddl-auto: validate  # ⭐ CRITICAL: Never auto-modify production schema
+      ddl-auto: validate  
     show-sql: false
     properties:
       hibernate:
@@ -103,4 +103,5 @@ logging:
     org.springframework.web: INFO
     org.telegram.telegrambots: INFO
   pattern:
+
     console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
