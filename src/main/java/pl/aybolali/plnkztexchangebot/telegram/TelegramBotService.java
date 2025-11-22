@@ -1239,10 +1239,8 @@ public class TelegramBotService {
             conversationStateService.setState(telegramUserId, ConversationState.EDITING_EXCHANGE_REQUEST_AMOUNT);
             conversationStateService.setUserData(telegramUserId, "edit_request_id", requestId.toString());
 
-            sendMessage(chatId, "✏️ <b>Изменение суммы</b>\n\n" +
-                    "Текущая сумма: <b>" + messageFormatter.formatAmount(request.getAmountNeed()) +
-                    " " + request.getCurrencyNeed() + "</b>\n\n" +
-                    "Введите новую сумму:");
+            sendMessage(chatId, messageFormatter.formatEditAmountMessage(request));
+
 
         } catch (Exception e) {
             log.error("Error starting edit: {}", e.getMessage());
@@ -1255,10 +1253,13 @@ public class TelegramBotService {
      */
     private void handleEditAmountInput(Long chatId, Long telegramUserId, String text) {
         try {
-            BigDecimal newAmount = new BigDecimal(text.replace(",", "."));
+            String readyText = text.trim()
+                    .replace(" ", "")
+                    .replace(",", ".");
+            BigDecimal newAmount = new BigDecimal(readyText);
 
             if (newAmount.compareTo(MIN_EXCHANGE_AMOUNT) < 0) {
-                sendMessage(chatId, "❌ Минимальная сумма: 10");
+                sendMessage(chatId, messageFormatter.formatAmountTooSmallError());
                 return;
             }
 
@@ -1275,7 +1276,7 @@ public class TelegramBotService {
             String message = messageFormatter.formatRequestUpdated(oldAmount, newAmount, currency);
 
             InlineKeyboardMarkup keyboard = TelegramKeyboardBuilder.create()
-                    .addButton("📊 Мои заявки", CALLBACK_MENU+"my_requests")
+                    .addButton("📊 Мои заявки", CALLBACK_MENU + "my_requests")
                     .addButton("🏠 Меню", "show_menu")
                     .build();
 
@@ -1284,7 +1285,7 @@ public class TelegramBotService {
             log.info("✅ Request {} updated: {} → {} {}", requestId, oldAmount, newAmount, currency);
 
         } catch (NumberFormatException e) {
-            sendMessage(chatId, "❌ Неверный формат суммы. Введите число, например: 10000, 10 000 или 500,50");
+            sendMessage(chatId, messageFormatter.formatInvalidAmountFormatError());
         } catch (Exception e) {
             log.error("Error editing amount: {}", e.getMessage());
             conversationStateService.clearState(telegramUserId);

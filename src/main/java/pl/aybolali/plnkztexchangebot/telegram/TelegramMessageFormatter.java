@@ -371,14 +371,22 @@ public class TelegramMessageFormatter {
                 
                 <b>Шаг 2/4:</b> Введите сумму
                 
-                Например: <code>50000</code>, <code>50 000</code>или <code>1000.50</code>
+                Например: <code>50000</code>, <code>50 000</code> или <code>1000.50</code>
                 
                 💡 Минимум: 10 %s
                 """,
                 currency,
                 currency);
     }
-
+    public String formatEditAmountMessage(ExchangeRequest request) {
+        return String.format(
+                "✏️ <b>Изменение суммы</b>\n\n" +
+                        "Текущая сумма: <b>%s %s</b>\n\n" +
+                        "Введите новую сумму:",
+                formatAmount(request.getAmountNeed()),
+                request.getCurrencyNeed()
+        );
+    }
     public String formatNeedStep3TransferMethod(BigDecimal amount, String currency) {
         return String.format("""
                 ✅ Сумма: <b>%s %s</b>
