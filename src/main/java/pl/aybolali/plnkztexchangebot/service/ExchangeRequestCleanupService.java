@@ -153,23 +153,10 @@ public class ExchangeRequestCleanupService {
         log.info("   ✅ Deleted {} requests (COMPLETED: {}, CANCELLED: {})",
                 totalDeleted, completedDeleted, cancelledDeleted);
 
-        resetSequenceIfIdOneIsFree();
 
         return totalDeleted;
     }
 
-    //kiss
-    private void resetSequenceIfIdOneIsFree() {
-        boolean idOneExists = exchangeRequestRepository.existsById(1L);
-
-        if (!idOneExists) {
-            log.info("🔄 ID=1 is free, resetting sequence to 1");
-            exchangeRequestRepository.resetSequence();
-            log.info("   ✅ Next Exchange Request ID will be: 1");
-        } else {
-            log.info("   ℹ️ ID=1 still exists - sequence not reset");
-        }
-    }
     private LocalDateTime calculateActiveCutoffDate() {
         LocalDateTime cutoff = LocalDateTime.now();
         if (inactiveDays > 0) {
